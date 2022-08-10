@@ -1,9 +1,11 @@
 var questionText=document.querySelector(".questionText");
-//console.log(questionText)
 var progressString=document.querySelector(".progessDisplay");
-//console.log(progressString)
 var responseContainer=document.querySelector(".responses");
-//localStorage.setItem("highScores",null)
+var quizWindow=document.querySelector(".quizWindow");
+var highScoreTable=document.querySelector(".highScoreTable");
+var highScoreBlock=document.querySelector(".highScores");
+
+
 //the ScoreItem class defines how highscore entries must be saved in local storage.
 class ScoreItem{
     constructor(initials,score){
@@ -23,9 +25,6 @@ class MultipleChoiceQuestion{
     constructor(text,answers =[]){
         this.text=text;
         this.answers=answers;
-    }
-    checkResponse(atIndex) {
-        return this.answers[atIndex].trueOrFalse;
     }
 }
 //A quiz class that contains a title, an array of questions, as well as the methods and variables related to running the quiz.
@@ -49,12 +48,17 @@ class Quiz{
             return false;
         }
     }
-    decrementQuestionIndex(){
-        if(this.currentQstIndex<0 && this.quizActive){
-            this.currentQstIndex--;
-        }
-    }
 }
+
+//The actual quiz.
+var exQuestion = new MultipleChoiceQuestion("Is Javascript statically typed?",[new RespOption("Yes",false),new RespOption("No",true)]);
+var exQuestion2 = new MultipleChoiceQuestion("Which of the following is a valid javascript for loop?",[new RespOption("for(int i=0,i<10,i++){}",false),new RespOption("for(const i=0,i<10,i++){}",false),new RespOption("for(var i=0,i<10,i++){}",true)]);
+var exQuestion3 = new MultipleChoiceQuestion("Javascript arrays start at...",[new RespOption("1",false),new RespOption("0",true),new RespOption("NaN",false)]);
+var exQuestion4 = new MultipleChoiceQuestion("Are variables case sensitive?",[new RespOption("No",false),new RespOption("Yes",true)]);
+var exQuestion5 = new MultipleChoiceQuestion("Which of the following will select an element of class example from the DOM?",[new RespOption("document.querySelector(\"questionText\");",false),new RespOption("document.querySelector(\"#questionText\");",false),new RespOption("document.querySelector(\".questionText\");",true)]);
+var exQuiz = new Quiz("This is a test quiz",[exQuestion,exQuestion2,exQuestion3,exQuestion4,exQuestion5]);
+buildQuestion(exQuiz,exQuiz.getCurrentQuestion());
+
 //a function that builds the UI for a given question object.
 function buildQuestion(quiz,question){
     changeText(question.text);
@@ -78,16 +82,13 @@ function checkAndAdvance(quiz,selection){
         quiz.score++;
     }
     if(quiz.incrementQuestionIndex()){
-        console.log("Attempted to advance question");
         removeAllChildNodes(responseContainer);
-        console.log("New question text: "+quiz.getCurrentQuestion().text);
         buildQuestion(quiz,quiz.getCurrentQuestion());
     }else if (quiz.quizActive){
         quiz.quizActive=false;
         updateScores(quiz.score);
         loadScores();
     }
-    
 }
 //param picked to mimic natural language. Doesn't really matter in javascript but it makes things nice in Swift.
 function changeText(to){
@@ -100,33 +101,19 @@ function removeAllChildNodes(from) {
     }
 }
 
-//The actual quiz.
-var exQuestion = new MultipleChoiceQuestion("Is Javascript statically typed?",[new RespOption("Yes",false),new RespOption("No",true)]);
-var exQuestion2 = new MultipleChoiceQuestion("Which of the following is a valid javascript for loop?",[new RespOption("for(int i=0,i<10,i++){}",false),new RespOption("for(const i=0,i<10,i++){}",false),new RespOption("for(var i=0,i<10,i++){}",true)]);
-var exQuestion3 = new MultipleChoiceQuestion("Javascript arrays start at...",[new RespOption("1",false),new RespOption("0",true),new RespOption("NaN",false)]);
-var exQuestion4 = new MultipleChoiceQuestion("Are variables case sensitive?",[new RespOption("No",false),new RespOption("Yes",true)]);
-var exQuestion5 = new MultipleChoiceQuestion("Which of the following will select an element of class example from the DOM?",[new RespOption("document.querySelector(\"questionText\");",false),new RespOption("document.querySelector(\"#questionText\");",false),new RespOption("document.querySelector(\".questionText\");",true)]);
-var exQuiz = new Quiz("This is a test quiz",[exQuestion,exQuestion2,exQuestion3,exQuestion4,exQuestion5]);
-buildQuestion(exQuiz,exQuiz.getCurrentQuestion());
-
-
-
+//A function to update the local highscores.
 function updateScores(newScore){
     var highscores=JSON.parse(localStorage.getItem("highScores"));
     var newEntry=new ScoreItem(initialsInput("Enter your initials to save your score."),newScore);
-    if(newEntry.initials===null || newEntry.initials===""){
-        console.log("no initials entered.");
+    if(highscores==null){
+        var entryArr=[]
+        entryArr.push(newEntry)
+        localStorage.setItem("highScores",JSON.stringify(entryArr));
     }else{
-        console.log(highscores);
-        if(highscores==null){
-            //console.log(newEntry);
-            var entryArr=[]
-            entryArr.push(newEntry)
-            localStorage.setItem("highScores",JSON.stringify(entryArr));
-        }else{
-            highscores.push(newEntry);
-            localStorage.setItem("highScores",JSON.stringify(highscores));
-        }
+        highscores.push(newEntry);
+        //sorts highscores by score after adding new entry.
+        highscores.sort((a, b) => (a.score > b.score) ? -1 : 1)
+        localStorage.setItem("highScores",JSON.stringify(highscores));
     }
 }
 //A recursive prompt to obtain and validate the user's initials.
@@ -141,6 +128,35 @@ function initialsInput(message){
     return lenStr;
   }
 }
+//A function to display the highscores.
 function loadScores(){
-
+    console.log(quizWindow);
+    quizWindow.setAttribute("style","display:none");
+    highScoreBlock.setAttribute("style","display:block");
+    removeAllChildNodes(highScoreTable);
+    highScoreTable.appendChild(generateTableHeading());
+    var highscores=JSON.parse(localStorage.getItem("highScores"));
+    for (var i=0;i<highscores.length;i++){
+        highScoreTable.appendChild(generateTableEntry(highscores[i]));
+    }
+}
+function generateTableHeading(){
+    var heading=document.createElement("tr");
+    var initialLabel=document.createElement("th");
+    initialLabel.textContent="INITIALS";
+    var scoreLabel=document.createElement("th");
+    scoreLabel.textContent="SCORE";
+    heading.appendChild(initialLabel);
+    heading.appendChild(scoreLabel);
+    return heading;
+}
+function generateTableEntry(scoreObject){
+    var item=document.createElement("tr");
+    var initialLabel=document.createElement("td");
+    initialLabel.textContent=scoreObject.initials;
+    var scoreLabel=document.createElement("td");
+    scoreLabel.textContent=scoreObject.score;
+    item.appendChild(initialLabel);
+    item.appendChild(scoreLabel);
+    return item;
 }

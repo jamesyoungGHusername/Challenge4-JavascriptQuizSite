@@ -8,6 +8,7 @@ main{
     display:fixed;
 }
 .quizWindow{
+    /* CHANGE BACK TO BLOCK AFTER TABLE IS BUILT */
     display: block;
     background-color:#FFFFE0;;
     border: 1px solid #eceff1;
@@ -24,5 +25,18 @@ main{
 }
 .responseItem{
     margin-top: 10px;
-
+}
+.highScores{
+    display:none;
+    background-color:#FFFFE0;;
+    border: 1px solid #eceff1;
+    border-radius: 8px;
+    box-shadow: rgba(60, 64, 67, 0.3) 0 1px 2px 0,
+    rgba(60, 64, 67, 0.15) 0 1px 3px 1px;
+    margin: 40px auto;
+    padding: 20px;
+    width: 60vw;
+}
+.highScoreTable{
+    width: 100%;
 }
