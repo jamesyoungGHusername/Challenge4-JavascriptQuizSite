@@ -25,18 +25,23 @@ Though this functionality wasn't implemented, the code was designed to make addi
 Below are screenshots of intended functionality:
 
 Upon loading the page the quiz display loads from the provided quiz objects.
+
 ![Upon loading the page the quiz starts](./assets/images/Timed-Quiz.png)
 
 As the user progresses through the quiz the UI updates, displaying time left, and which question the user is on.
+
 ![Second screenshot of a user who has made more progress in the quiz](./assets/images/Updates-Progress.png)
 
 Upon finishing the quiz (or upon the time running out) the page sets the quiz to not active, and prompts the user for their initials to save their score. If the user doesnt enter their initials their score isn't saved.
+
 ![Screenshot of the page prompting the user for their initials](./assets/images/Asks-For-Initials.png)
 
 If the user enters invalid initials (more than 5 characters) the function changes the message displayed to the user and asks again for valid input. This is recursive and will continue until the user provides valid input or decides not to save their score.
+
 ![screenshot demonstrating input validation](./assets/images/Input-Validation.png)
 
 Finally, after providing valid input to save their score (or after clicking the High Scores button on the header) the user is shown the high scores table.
+
 ![screenshot of the locally stored high scores](./assets/images/Scoreboard.png)
 
 
