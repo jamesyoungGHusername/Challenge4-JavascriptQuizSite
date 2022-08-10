@@ -105,6 +105,8 @@ function buildButton(quiz,responseOption){
 function checkAndAdvance(quiz,selection){
     if(selection.trueOrFalse){
         quiz.score++;
+    }else{
+        timeRemaining--;
     }
     if(quiz.incrementQuestionIndex()){
         removeAllChildNodes(responseContainer);
@@ -144,14 +146,16 @@ function updateScores(newScore){
 //A recursive prompt to obtain and validate the user's initials.
 function initialsInput(message){
     var lenStr = prompt(message);
-  if(lenStr===null || lenStr===""){
+    if(lenStr===null || lenStr===""){
     pass
-  }else{
-    if (lenStr.length>5){
-      initialsInput("Sorry, but you have too many initials. Choose up to 5.")
+    }else{
+        if (lenStr.length>5){
+            return initialsInput("Sorry, but you have too many initials. Choose up to 5.")
+        }else{
+            return lenStr;
+        }
+        
     }
-    return lenStr;
-  }
 }
 //A function to display the highscores.
 function loadScores(){
