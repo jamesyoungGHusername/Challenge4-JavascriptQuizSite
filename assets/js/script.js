@@ -4,7 +4,10 @@ var responseContainer=document.querySelector(".responses");
 var quizWindow=document.querySelector(".quizWindow");
 var highScoreTable=document.querySelector(".highScoreTable");
 var highScoreBlock=document.querySelector(".highScores");
+var seeHighScores=document.querySelector(".seeHighScores");
+var timerText=document.querySelector(".timerText");
 
+var timeRemaining=15;
 
 //the ScoreItem class defines how highscore entries must be saved in local storage.
 class ScoreItem{
@@ -58,6 +61,28 @@ var exQuestion4 = new MultipleChoiceQuestion("Are variables case sensitive?",[ne
 var exQuestion5 = new MultipleChoiceQuestion("Which of the following will select an element of class example from the DOM?",[new RespOption("document.querySelector(\"questionText\");",false),new RespOption("document.querySelector(\"#questionText\");",false),new RespOption("document.querySelector(\".questionText\");",true)]);
 var exQuiz = new Quiz("This is a test quiz",[exQuestion,exQuestion2,exQuestion3,exQuestion4,exQuestion5]);
 buildQuestion(exQuiz,exQuiz.getCurrentQuestion());
+updateTime();
+
+//Counts down, ends quiz when time runs out.
+function updateTime(){
+    var timerInterval = setInterval(function() {
+        timeRemaining--;
+        timerText.textContent="Time Remaining: "+timeRemaining;
+        if (timeRemaining==0){
+            clearInterval(timerInterval);
+            if(exQuiz.quizActive){
+                exQuiz.quizActive=false;
+                updateScores(exQuiz.score);
+                loadScores();
+            }
+        }
+        if(!exQuiz.quizActive){
+            timeRemaining=0;
+            clearInterval(timerInterval);
+            timerText.textContent="DONE";
+        }
+    },1000);
+}
 
 //a function that builds the UI for a given question object.
 function buildQuestion(quiz,question){
@@ -130,15 +155,17 @@ function initialsInput(message){
 }
 //A function to display the highscores.
 function loadScores(){
-    console.log(quizWindow);
     quizWindow.setAttribute("style","display:none");
     highScoreBlock.setAttribute("style","display:block");
     removeAllChildNodes(highScoreTable);
     highScoreTable.appendChild(generateTableHeading());
     var highscores=JSON.parse(localStorage.getItem("highScores"));
-    for (var i=0;i<highscores.length;i++){
+    if(highscores!=null){
+        for (var i=0;i<highscores.length;i++){
         highScoreTable.appendChild(generateTableEntry(highscores[i]));
+        }
     }
+    
 }
 function generateTableHeading(){
     var heading=document.createElement("tr");
@@ -160,3 +187,4 @@ function generateTableEntry(scoreObject){
     item.appendChild(scoreLabel);
     return item;
 }
+seeHighScores.addEventListener("click",loadScores);
